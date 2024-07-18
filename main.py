@@ -185,17 +185,17 @@ def get_project_submission():
         website = st.text_input("Link to Project Website") 
         twitter = st.text_input("Link to Project Twitter")
         logo = st.file_uploader("Upload your logo (PNG/JPG/JPEG)", type=['png', 'jpg', 'jpeg'], help="For the best results, use a square image of just your logo's icon")
-        validate_github = st.selectbox("Does your project have a public GitHub", ["","yes", "no"])
+        validate_github = st.selectbox("Does your project have a public GitHub?", ["","yes", "no"])
         if validate_github == "yes":
             github = st.text_input("Link to Project GitHub") 
         category = st.selectbox("Select the project's category", ["","DeFi", "Gaming", "Infra", "RWA", "Social", "NFT", "Other"])
-        validate_llama = st.selectbox("Does your project have a DefiLlama page", ["","yes", "no"])
+        validate_llama = st.selectbox("Does your project have a DefiLlama page?", ["","yes", "no"])
         if validate_llama == "yes":
             defillama = st.text_input("Link to DefiLlama page") 
-        validate_contracts = st.selectbox("Does your project have smart contracts", ["","yes", "no"])
+        validate_contracts = st.selectbox("Does your project have smart contracts?", ["","yes", "no"])
         if validate_contracts == "yes":
             contracts = st.text_input("Comma-separated list of contracts", placeholder="0x077ab174ac10c904c5393f65fade8279dfbd3779, 0xa0b9ebd2cc138e0748c69baf66df2e01c57521ec, 0xb890844b1efd59d04d69cfb50a7ea984df94b143 ...")
-        validate_dune = st.selectbox("Does your project have a Dune dashboard", ["","yes", "no"]) 
+        validate_dune = st.selectbox("Does your project have a Dune dashboard?", ["","yes", "no"]) 
         if validate_dune == "yes":
             dune = st.text_input("Link to Dune dashboard") 
         

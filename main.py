@@ -65,7 +65,7 @@ def update_table(project_dict):
     table_name_metadata = "ARBIGRANTS_LABELS_PROJECT_METADATA"
 
     category = project_dict.get('category', '')
-    grant_date = ''  
+    grant_date = project_dict.get('grant_date', '') 
     llama_slug = ''
     llama_name = ''
     if project_dict.get('defillama'):
@@ -111,6 +111,27 @@ def update_table(project_dict):
     """
     cursor.execute(merge_query_metadata, (name, category, grant_date, llama_slug, llama_name, chain, description, logo_link, website, twitter, dune))
 
+    # Update ARBIGRANTS_LABELS_PROJECT_MILESTONES table
+    table_name_milestones = "ARBIGRANTS_LABELS_PROJECT_MILESTONES"
+
+    total_milestones = project_dict.get('milestone_total', 1)
+    milestones_completed = 0
+
+    merge_query_milestones = f"""
+    MERGE INTO {table_name_milestones} AS target
+    USING (
+        SELECT
+            %s AS NAME,
+            %s AS TOTAL_MILESTONES,
+            %s AS MILESTONES_COMPLETED
+    ) AS source
+    ON target.NAME = source.NAME
+    WHEN NOT MATCHED THEN
+        INSERT (NAME, TOTAL_MILESTONES, MILESTONES_COMPLETED)
+        VALUES (source.NAME, source.TOTAL_MILESTONES, source.MILESTONES_COMPLETED);
+    """
+    cursor.execute(merge_query_milestones, (name, total_milestones, milestones_completed))
+
     conn.commit()
     cursor.close()
     conn.close()
@@ -150,7 +171,7 @@ def validate_evm_addresses(contracts_string):
 st.set_page_config(
   page_title="Arbigrants Project Submission",
   page_icon="📝",
-  layout="wide",
+ 
 )
 
 # Create the title at the tp of page
@@ -168,7 +189,7 @@ if "new_project" in st.session_state:
         except Exception as e:
             error_message = f"An error occurred while trying to record your project: {str(e)}"
             st.error(error_message)
-            st.error(f"Full error details:\n\n{traceback.format_exc()}")
+            # st.error(f"Full error details:\n\n{traceback.format_exc()}")
 
 @st.experimental_fragment
 def get_project_submission():
@@ -184,7 +205,11 @@ def get_project_submission():
         chain = st.selectbox("Which chain are you deployed on?", ["Arbitrum One", "Arbitrum Orbit", "Arbitrum Nova", "Offchain"])
         website = st.text_input("Link to Project Website") 
         twitter = st.text_input("Link to Project Twitter")
-        logo = st.file_uploader("Upload your logo (PNG/JPG/JPEG)", type=['png', 'jpg', 'jpeg'], help="For the best results, use a square image of just your logo's icon")
+
+        grant_date = st.date_input("When did you sign your grant agreement?", format="MM/DD/YYYY", value=None)
+        milestone_total = st.number_input("How many milestones do you need to complete for this grant?", min_value =1)
+
+        logo = st.file_uploader("Upload your logo (PNG/JPG/JPEG) (image name cant include special characters like '*/)", type=['png', 'jpg', 'jpeg'], help="For the best results, use a square image of just your logo's icon")
         validate_github = st.selectbox("Does your project have a public GitHub?", ["","yes", "no"])
         if validate_github == "yes":
             github = st.text_input("Link to Project GitHub") 
@@ -211,6 +236,8 @@ def get_project_submission():
                                                     chain=chain, 
                                                     website=website,
                                                     twitter=twitter,
+                                                    grant_date=grant_date,
+                                                    milestone_total=milestone_total,
                                                     github=github,
                                                     category=category,
                                                     defillama=defillama,
